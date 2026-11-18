@@ -1,11 +1,14 @@
 
 import pygame  # pyright: ignore[reportMissingImports]
+import sys
 
 from constants import *
-from logger import log_state
+from logger import log_state , log_event
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
+from shot import Shot
+
 
 
 
@@ -24,6 +27,7 @@ def main():
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
 
 
 
@@ -31,6 +35,7 @@ def main():
     Asteroid.containers = (asteroids, updatable, drawable)
     AsteroidField.containers = (updatable,)
     field_name = AsteroidField()
+    Shot.containers = (shots, updatable, drawable)
 
 
 
@@ -44,6 +49,17 @@ def main():
 
         screen.fill("black")
         updatable.update(dt)
+        for asteroid in asteroids :
+            if asteroid.collide_with(player):
+                log_event("player_hit")
+                print("Game over!")
+                sys.exit()
+            for shot in shots:
+                if asteroid.collide_with(shot):
+                    log_event("asteroid_shot")
+                    asteroid.split()
+                    shot.kill()
+
         for draw in drawable :
             draw.draw(screen)
 
